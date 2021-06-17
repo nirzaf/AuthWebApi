@@ -1,31 +1,3 @@
-# aspnet-core-3-jwt-refresh-tokens-api
-
-ASP.NET Core 3.1 API - JWT Authentication with Refresh Tokens
-
-
-ASP.NET Core 3.1
-
-Other versions available:
-
-.NET: .NET 5.0
-Node: Node.js + MongoDB
-In this tutorial we'll go through an example of how to implement JWT (JSON Web Token) authentication with refresh tokens in an ASP.NET Core 3.1 API.
-
-For an extended example that includes email sign up, verification, forgot password and user management (CRUD) functionality see ASP.NET Core 3.1 - Boilerplate API with Email Sign Up, Verification, Authentication & Forgot Password.
-
-The example API has the following endpoints/routes to demonstrate authenticating with JWT, refreshing and revoking tokens, and accessing secure routes:
-
-/users/authenticate - public route that accepts HTTP POST requests containing a username and password in the body. If the username and password are correct then a JWT authentication token and the user details are returned in the response body, and a refresh token cookie (HTTP Only) is returned in the response headers.
-/users/refresh-token - public route that accepts HTTP POST requests with a refresh token cookie. If the cookie exists and the refresh token is valid then a new JWT authentication token and the user details are returned in the response body, a new refresh token cookie (HTTP Only) is returned in the response headers and the old refresh token is revoked.
-/users/revoke-token - secure route that accepts HTTP POST requests containing a refresh token either in the body or in a cookie, if both are present the token in the body is used. If the refresh token is valid and active then it is revoked and can no longer be used to refresh JWT tokens.
-/users - secure route that accepts HTTP GET requests and returns a list of all the users in the application if the HTTP Authorization header contains a valid JWT token. If there is no auth token or the token is invalid then a 401 Unauthorized response is returned.
-/users/{id} - secure route that accepts HTTP GET requests and returns the details of the user with the specified id.
-/users/{id}/refresh-tokens - secure route that accepts HTTP GET requests and returns a list of all refresh tokens (active and revoked) of the user with the specified id.
-To keep the api code as simple as possible, it is configured to use the EF Core InMemory database provider which allows Entity Framework Core to create and connect to an in-memory database rather than you having to install a real db server. This can be easily switched out to a real db provider when you're ready to work with a database such as SQL Server, Oracle, MySql etc. For an example api that uses SQLite in development and SQL Server in production see this post.
-
-The tutorial project is available on GitHub at https://github.com/cornflourblue/aspnet-core-3-jwt-refresh-tokens-api.
-
-
 Tutorial Contents
 Tools required to develop ASP.NET Core 3.1 applications
 Running the example API locally
@@ -68,8 +40,8 @@ In the URL field enter the address to the authenticate route of your local API -
 Select the "Body" tab below the URL field, change the body type radio button to "raw", and change the format dropdown selector to "JSON".
 Enter a JSON object containing the test username and password in the "Body" textarea:
 {
-    "username": "test",
-    "password": "test"
+"username": "test",
+"password": "test"
 }
 Click the "Send" button, you should receive a "200 OK" response with the user details including a JWT token in the response body and a refresh token in the response cookies.
 Here's a screenshot of Postman after the request is sent and the user has been authenticated:
@@ -129,7 +101,7 @@ Select the "Authorization" tab below the URL field, change the type to "Bearer T
 Select the "Body" tab below the URL field, change the body type radio button to "raw", and change the format dropdown selector to "JSON".
 Enter a JSON object containing the active refresh token from the previous step in the "Body" textarea, e.g:
 {
-    "token": "ENTER THE ACTIVE REFRESH TOKEN HERE"
+"token": "ENTER THE ACTIVE REFRESH TOKEN HERE"
 }
 Click the "Send" button, you should receive a "200 OK" response with the message Token revoked.
 NOTE: You can also revoke the token in the refreshToken cookie with the /users/revoke-token route, to revoke the refresh token cookie simply send the same request with an empty body.
@@ -137,7 +109,7 @@ NOTE: You can also revoke the token in the refreshToken cookie with the /users/r
 Here's a screenshot of Postman after making the request and the token has been revoked:
 
 
- 
+
 
 
 Running an Angular app with the JWT Refresh Tokens API
@@ -147,7 +119,7 @@ Download or clone the Angular 9 tutorial code from https://github.com/cornflourb
 Install all required npm packages by running npm install from the command line in the project root folder (where the package.json is located).
 Remove or comment out the line below the comment // provider used to create fake backend located in the /src/app/app.module.ts file.
 Start the application by running npm start from the command line in the project root folder, this will launch a browser displaying the Angular example application and it should be hooked up with the ASP.NET Core JWT Refresh Tokens API that you already have running.
- 
+
 ASP.NET Core API Project Structure
 The tutorial project is organised into the following folders:
 Controllers - define the end points / routes for the web api, controllers are the entry point into the web api from client applications via http requests.
@@ -177,7 +149,7 @@ appsettings.json
 Program.cs
 Startup.cs
 WebApi.csproj
- 
+
 Users Controller
 Path: /Controllers/UsersController.cs
 The ASP.NET Core users controller defines and handles all routes / endpoints for the api that relate to users, this includes authentication, refreshing and revoking tokens, and retrieving user and refresh token data. Within each route the controller calls the user service to perform the action required, this enables the controller to stay 'lean' and completely separate from the business logic and data access code.
@@ -195,12 +167,12 @@ using System;
 
 namespace WebApi.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("[controller]")]
-    public class UsersController : ControllerBase
-    {
-        private IUserService _userService;
+[Authorize]
+[ApiController]
+[Route("[controller]")]
+public class UsersController : ControllerBase
+{
+private IUserService _userService;
 
         public UsersController(IUserService userService)
         {
@@ -300,7 +272,7 @@ namespace WebApi.Controllers
     }
 }
 Back to top
- 
+
 Refresh Token Entity
 Path: /Entities/RefreshToken.cs
 The refresh token entity class represents the data for a refresh token in the application.
@@ -320,13 +292,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Entities
 {
-    [Owned]
-    public class RefreshToken
-    {
-        [Key]
-        [JsonIgnore]
-        public int Id { get; set; }
-        
+[Owned]
+public class RefreshToken
+{
+[Key]
+[JsonIgnore]
+public int Id { get; set; }
+
         public string Token { get; set; }
         public DateTime Expires { get; set; }
         public bool IsExpired => DateTime.UtcNow >= Expires;
@@ -339,7 +311,7 @@ namespace WebApi.Entities
     }
 }
 Back to top
- 
+
 User Entity
 Path: /Entities/User.cs
 The user entity class represents the data for a user in the application.
@@ -353,12 +325,12 @@ using System.Collections.Generic;
 
 namespace WebApi.Entities
 {
-    public class User
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Username { get; set; }
+public class User
+{
+public int Id { get; set; }
+public string FirstName { get; set; }
+public string LastName { get; set; }
+public string Username { get; set; }
 
         [JsonIgnore]
         public string Password { get; set; }
@@ -368,7 +340,7 @@ namespace WebApi.Entities
     }
 }
 Back to top
- 
+
 App Settings Class
 Path: /Helpers/AppSettings.cs
 The app settings class contains properties defined in the appsettings.json file and is used for accessing application settings via objects that are injected into classes using the ASP.NET Core built in dependency injection (DI) system. For example the User Service accesses app settings via an IOptions<AppSettings> appSettings object that is injected into the constructor.
@@ -377,13 +349,13 @@ Mapping of configuration sections to classes is done in the ConfigureServices me
 
 namespace WebApi.Helpers
 {
-    public class AppSettings
-    {
-        public string Secret { get; set; }
-    }
+public class AppSettings
+{
+public string Secret { get; set; }
+}
 }
 Back to top
- 
+
 Data Context
 Path: /Helpers/DataContext.cs
 The data context class is used for accessing application data through Entity Framework Core. It derives from the EF Core DbContext class and has a public Users property for accessing and managing user data. The data context is used by services such as the user service for handling all low level data (CRUD) operations.
@@ -393,15 +365,15 @@ using WebApi.Entities;
 
 namespace WebApi.Helpers
 {
-    public class DataContext : DbContext
-    {
-        public DbSet<User> Users { get; set; }
+public class DataContext : DbContext
+{
+public DbSet<User> Users { get; set; }
 
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
     }
 }
 Back to top
- 
+
 Authenticate Request Model
 Path: /Models/AuthenticateRequest.cs
 The authenticate request model defines the parameters for incoming requests to the /users/authenticate route, it is attached to the route as the parameter to the Authenticate action method of the users controller. When an HTTP POST request is received by the route, the data from the body is bound to an instance of the AuthenticateRequest class, validated and passed to the method.
@@ -412,17 +384,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApi.Models
 {
-    public class AuthenticateRequest
-    {
-        [Required]
-        public string Username { get; set; }
+public class AuthenticateRequest
+{
+[Required]
+public string Username { get; set; }
 
         [Required]
         public string Password { get; set; }
     }
 }
 Back to top
- 
+
 Authenticate Response Model
 Path: /Models/AuthenticateResponse.cs
 The authenticate response model defines the data returned after successful authentication. It includes basic user details, a JWT token and a refresh token.
@@ -434,13 +406,13 @@ using WebApi.Entities;
 
 namespace WebApi.Models
 {
-    public class AuthenticateResponse
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Username { get; set; }
-        public string JwtToken { get; set; }
+public class AuthenticateResponse
+{
+public int Id { get; set; }
+public string FirstName { get; set; }
+public string LastName { get; set; }
+public string Username { get; set; }
+public string JwtToken { get; set; }
 
         [JsonIgnore] // refresh token is returned in http only cookie
         public string RefreshToken { get; set; }
@@ -457,7 +429,7 @@ namespace WebApi.Models
     }
 }
 Back to top
- 
+
 Revoke Token Request Model
 Path: /Models/RevokeTokenRequest.cs
 The revoke token request model defines the parameters for incoming requests to the /users/revoke-token route of the api, it is attached to the route as the parameter to the RevokeToken action method of the users controller. When an HTTP POST request is received by the route, the data from the body is bound to an instance of the RevokeTokenRequest class, validated and passed to the method.
@@ -466,13 +438,13 @@ The Token property is optional in the request body because the route also suppor
 
 namespace WebApi.Models
 {
-    public class RevokeTokenRequest
-    {
-        public string Token { get; set; }
-    }
+public class RevokeTokenRequest
+{
+public string Token { get; set; }
+}
 }
 Back to top
- 
+
 User Service
 Path: /Services/UserService.cs
 The user service contains the core logic for authentication, generating JWT and refresh tokens, refreshing and revoking tokens, and fetching user data.
@@ -506,14 +478,14 @@ using WebApi.Helpers;
 
 namespace WebApi.Services
 {
-    public interface IUserService
-    {
-        AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
-        AuthenticateResponse RefreshToken(string token, string ipAddress);
-        bool RevokeToken(string token, string ipAddress);
-        IEnumerable<User> GetAll();
-        User GetById(int id);
-    }
+public interface IUserService
+{
+AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
+AuthenticateResponse RefreshToken(string token, string ipAddress);
+bool RevokeToken(string token, string ipAddress);
+IEnumerable<User> GetAll();
+User GetById(int id);
+}
 
     public class UserService : IUserService
     {
@@ -642,22 +614,22 @@ namespace WebApi.Services
     }
 }
 Back to top
- 
+
 App Settings (Development)
 Path: /appsettings.Development.json
 Configuration file with application settings that are specific to the development environment.
 
 {
-    "Logging": {
-        "LogLevel": {
-            "Default": "Debug",
-            "System": "Information",
-            "Microsoft": "Information"
-        }
-    }
+"Logging": {
+"LogLevel": {
+"Default": "Debug",
+"System": "Information",
+"Microsoft": "Information"
+}
+}
 }
 Back to top
- 
+
 App Settings
 Path: /appsettings.json
 Root configuration file containing application settings for all environments.
@@ -665,20 +637,20 @@ Root configuration file containing application settings for all environments.
 IMPORTANT: The "Secret" property is used to sign and verify JWT tokens for authentication, change it to a random string to ensure nobody else can generate a JWT with the same secret and gain unauthorized access to your api. A quick and easy way is join a couple of GUIDs together to make a long random string (e.g. from https://www.guidgenerator.com/).
 
 {
-    "AppSettings": {
-        "Secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING"
-    },
-    "Logging": {
-        "LogLevel": {
-            "Default": "Information",
-            "Microsoft": "Warning",
-            "Microsoft.Hosting.Lifetime": "Information"
-        }
-    },
-    "AllowedHosts": "*"
+"AppSettings": {
+"Secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING"
+},
+"Logging": {
+"LogLevel": {
+"Default": "Information",
+"Microsoft": "Warning",
+"Microsoft.Hosting.Lifetime": "Information"
+}
+},
+"AllowedHosts": "*"
 }
 Back to top
- 
+
 ASP.NET Core Program.cs
 Path: /Program.cs
 The program class is a console app that is the main entry point to start the application, it configures and launches the web api host and web server using an instance of IHostBuilder. ASP.NET Core applications require a host in which to execute.
@@ -690,12 +662,12 @@ using Microsoft.Extensions.Hosting;
 
 namespace WebApi
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+public class Program
+{
+public static void Main(string[] args)
+{
+CreateHostBuilder(args).Build().Run();
+}
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -707,7 +679,7 @@ namespace WebApi
     }
 }
 Back to top
- 
+
 ASP.NET Core Startup Class
 Path: /Startup.cs
 The startup class configures the request pipeline of the application, dependency injection and how all requests are handled.
@@ -736,12 +708,12 @@ using System;
 
 namespace WebApi
 {
-    public class Startup
-    {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+public class Startup
+{
+public Startup(IConfiguration configuration)
+{
+Configuration = configuration;
+}
 
         public IConfiguration Configuration { get; }
 
@@ -809,7 +781,7 @@ namespace WebApi
     }
 }
 Back to top
- 
+
 ASP.NET Core CSProj File
 Path: /WebApi.csproj
 The csproj (C# project) is an MSBuild based file that contains target framework and NuGet package dependency information for the application.
